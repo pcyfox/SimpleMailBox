@@ -24,22 +24,8 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
-.idea/workspace.xml
-app/.externalNativeBuild/cmake/debug/arm64-v8a/CMakeFiles/CMakeTmp/
-app/.externalNativeBuild/cmake/debug/armeabi-v7a/CMakeFiles/CMakeTmp/
-app/.externalNativeBuild/cmake/debug/x86/CMakeFiles/CMakeTmp/
-app/.externalNativeBuild/cmake/debug/x86_64/CMakeFiles/CMakeTmp/
-app/.externalNativeBuild/cmake/release/arm64-v8a/CMakeFiles/CMakeTmp/
-app/.externalNativeBuild/cmake/release/arm64-v8a/CMakeFiles/native-lib.dir/
-app/.externalNativeBuild/cmake/release/armeabi-v7a/CMakeFiles/CMakeTmp/
-app/.externalNativeBuild/cmake/release/armeabi-v7a/CMakeFiles/native-lib.dir/
-app/.externalNativeBuild/cmake/release/x86/CMakeFiles/CMakeTmp/
-app/.externalNativeBuild/cmake/release/x86/CMakeFiles/native-lib.dir/
-app/.externalNativeBuild/cmake/release/x86_64/CMakeFiles/CMakeTmp/
-app/.externalNativeBuild/cmake/release/x86_64/CMakeFiles/native-lib.dir/
-app/libs/
-baselibrary/libs/
-baselibrary/src/main/res/drawable/
-maillibrary/libs/
-maillibrary/src/main/java/
-maillibrary/src/main/res/drawable/
+.idea/
+app/.externalNativeBuild/
+
+
+

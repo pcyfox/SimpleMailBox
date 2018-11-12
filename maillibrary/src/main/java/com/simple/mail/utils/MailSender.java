@@ -1,22 +1,16 @@
 package com.simple.mail.utils;
 
-import android.app.Activity;
 import android.os.Handler;
 import android.text.TextUtils;
-import android.util.Log;
 
-
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.simple.base.utils.ImageUtils;
-import com.simple.mail.entity.Addresser;
+import com.simple.mail.entity.AddressInfo;
 import com.simple.mail.entity.Attach;
 import com.simple.mail.entity.Image;
 import com.simple.mail.entity.Mail;
 import com.simple.mail.entity.Person;
-
-import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -42,10 +36,10 @@ public class MailSender {
     private static final String TAG = "MailSender";
 
     private ArrayList<Image> images;//一个有规则的ArrayList，用作嵌入图片
-    private Addresser addresser;
+    private AddressInfo addresser;
     private Mail mail;
 
-    public MailSender(Addresser addresser, Mail mail, ArrayList<Image> images) {
+    public MailSender(AddressInfo addresser, Mail mail, ArrayList<Image> images) {
         this.images = images;
         this.addresser = addresser;
         this.mail = mail;
@@ -80,7 +74,8 @@ public class MailSender {
      */
     public boolean send(Handler handler) {
         mail.folderType = Mail.MAIL_TYPE_OUTBOX;//发送之前先保存到发件箱
-        mail.id = DBMail.getInstance().addOrUpdateMail(mail);
+        //TODO
+       // mail.id = DBMail.getInstance().addOrUpdateMail(mail);
         List<Person> receiverList = new ArrayList<>();//所有收件人
         receiverList.addAll(mail.tosList);
         receiverList.addAll(mail.ccsList);
@@ -89,9 +84,11 @@ public class MailSender {
 
         boolean isSendSuccess = mail.folderType == Mail.MAIL_TYPE_SEND;
         if (isSendSuccess) {//发送成功
-            DBMail.getInstance().updateMailType(mail.id, Mail.MAIL_TYPE_SEND);
+           //TODO
+           // DBMail.getInstance().updateMailType(mail.id, Mail.MAIL_TYPE_SEND);
             //保存最近联系人
-            Jna.getInstance().saveNearestContacts(mail.tosList);
+            //TODO
+          //  Jna.getInstance().saveNearestContacts(mail.tosList);
             //添加成功之后，将不在联系人列表里的收件人，密送人，抄送人添加到联系人列表
             addContacts(receiverList, handler);
         }
@@ -115,8 +112,9 @@ public class MailSender {
         MimeMultipart allMultipart = new MimeMultipart();
         MimeBodyPart contentpart = createContent(mail.contentNoImage);
         allMultipart.addBodyPart(contentpart);
-        for (int i = 0; i < mail.attchsList.size(); i++) {//创建用于组合邮件正文和附件的MimeMultipart对象
-            allMultipart.addBodyPart(createAttachment(mail.attchsList.get(i)));
+
+        for (int i = 0; i < mail.attchList.size(); i++) {//创建用于组合邮件正文和附件的MimeMultipart对象
+            allMultipart.addBodyPart(createAttachment(mail.attchList.get(i)));
         }
         message.setContent(allMultipart);//设置整个邮件内容为最终组合出的MimeMultipart对象
         message.saveChanges();
@@ -196,7 +194,8 @@ public class MailSender {
             jsonObject.addProperty("mobile", "");
             jsonArray.add(jsonObject);
         }
-        Jna.getInstance().batchAddContactsForEmail(jsonArray.toString(), handler);
+        //TODO
+       // Jna.getInstance().batchAddContactsForEmail(jsonArray.toString(), handler);
     }
 
 

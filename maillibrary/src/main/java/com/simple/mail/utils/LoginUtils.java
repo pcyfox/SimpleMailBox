@@ -7,7 +7,7 @@ import android.os.Message;
 import android.util.Log;
 
 
-import com.simple.mail.entity.Addresser;
+import com.simple.mail.entity.AddressInfo;
 import com.simple.mail.entity.Protocol;
 
 import java.util.ArrayList;
@@ -33,13 +33,13 @@ public class LoginUtils {
     /**
      * 登录
      */
-    public static boolean loginPOP3orIMAP(String account, String password, Protocol p, Addresser addresser) {
+    private static boolean loginPOP3orIMAP(String account, String password, Protocol p, AddressInfo addressInfo) {
         try {
             Session session = getSessionPOP3orIMAP(p);//得到session
             session.setDebug(true);
             Store store = session.getStore(p.protocl);//设置通讯协议
             store.connect(account, password);//连接
-            addresser.setReceiveProtocol(p);
+            addressInfo.setReceiveProtocol(p);
         } catch (MessagingException e) {
             if (e instanceof AuthenticationFailedException) {
                 Log.e(TAG, "loginPOP3orIMAP: 认证失败");
@@ -52,10 +52,15 @@ public class LoginUtils {
         return true;
     }
 
+
+
+
+
+
     /**
      * SMTP（Simple Mail Transfer Protocol）即简单邮件传输协议
      */
-    public static boolean connectBySMTP(String account, String password, Protocol p, Addresser addresser) {
+    public static boolean connectBySMTP(String account, String password, Protocol p, AddressInfo addresser) {
         try {
             Session session = getSessionSMTP(p, account, password);  //得到session
             Transport transport = session.getTransport(p.protocl);//设置通讯协议
@@ -76,7 +81,7 @@ public class LoginUtils {
     /**
      * 登录
      */
-    public static boolean loginPOP3orIMAP2(String account, String password, ArrayList<Protocol> list, Addresser addresser) {
+    private static boolean loginPOP3orIMAP2(String account, String password, ArrayList<Protocol> list, AddressInfo addresser) {
         if (list.isEmpty()) {//如果list为空，那就使用公共的去配置
             Protocol receiveProtocol = new Protocol("imap", "mail." + account.substring(account.indexOf("@") + 1, account.length()), "143", false);
 
@@ -105,7 +110,7 @@ public class LoginUtils {
     /**
      * 登录
      */
-    public static boolean loginPOP3orIMAP(String account, String password, Addresser addresser) {
+    public static boolean loginPOP3orIMAP(String account, String password, AddressInfo addresser) {
         ArrayList<Protocol> listPOP3orIMAP = ProtocolUtils.selectPOP3orIMAP(account); //得到所有条件的接收协议
         if (listPOP3orIMAP == null) {
             return false;
@@ -117,11 +122,10 @@ public class LoginUtils {
     /**
      * 尝试连接服务器成功并通过POP3或IMAP协议登录成功则返回true
      */
-    public static boolean loginPOP3AndIMAP(final Context context, final Addresser addresser) {
+    public static boolean loginPOP3AndIMAP(final Context context, final AddressInfo addresser) {
         Boolean isLoginReceive = LoginUtils.loginPOP3orIMAP(addresser.email_account, addresser.email_password, addresser.receiveProtocol, addresser);
         Boolean isLoginSend = LoginUtils.connectBySMTP(addresser.email_account, addresser.email_password, addresser.sendProtocol, addresser);
         return isLoginReceive && isLoginSend;
-
     }
 
     /**

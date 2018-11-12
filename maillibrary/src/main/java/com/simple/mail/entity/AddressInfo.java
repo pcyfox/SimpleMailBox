@@ -7,7 +7,7 @@ import com.google.gson.annotations.Expose;
 /**
  * 收件人的各种信息
  */
-public class Addresser implements Parcelable {
+public class AddressInfo implements Parcelable {
     @Expose
     public String email_account;
     @Expose
@@ -48,7 +48,7 @@ public class Addresser implements Parcelable {
     public Protocol sendProtocol;
     public Protocol receiveProtocol;
 
-    public Addresser(String id,String signature) {
+    public AddressInfo(String id, String signature) {
         this.user_id = id;
         this.first_mail_uid = "";
         this.last_mail_uid = "";
@@ -86,7 +86,7 @@ public class Addresser implements Parcelable {
 
     @Override
     public String toString() {
-        return "Addresser{" +
+        return "AddressInfo{" +
                 ", email_account='" + email_account + '\'' +
                 ", email_name='" + email_name + '\'' +
                 ", email_password='" + email_password + '\'' +
@@ -136,7 +136,7 @@ public class Addresser implements Parcelable {
         dest.writeParcelable(this.receiveProtocol, flags);
     }
 
-    private Addresser(Parcel in) {
+    private AddressInfo(Parcel in) {
         this.email_account = in.readString();
         this.email_name = in.readString();
         this.email_password = in.readString();
@@ -158,15 +158,15 @@ public class Addresser implements Parcelable {
         this.receiveProtocol = in.readParcelable(Protocol.class.getClassLoader());
     }
 
-    public static final Parcelable.Creator<Addresser> CREATOR = new Parcelable.Creator<Addresser>() {
+    public static final Parcelable.Creator<AddressInfo> CREATOR = new Parcelable.Creator<AddressInfo>() {
         @Override
-        public Addresser createFromParcel(Parcel source) {
-            return new Addresser(source);
+        public AddressInfo createFromParcel(Parcel source) {
+            return new AddressInfo(source);
         }
 
         @Override
-        public Addresser[] newArray(int size) {
-            return new Addresser[size];
+        public AddressInfo[] newArray(int size) {
+            return new AddressInfo[size];
         }
     };
 }

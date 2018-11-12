@@ -1,16 +1,12 @@
 package com.simple.mail.utils;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.PowerManager;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
-import android.util.Log;
 
 
-import com.simple.mail.UserConfig;
-import com.simple.mail.entity.Addresser;
+import com.simple.mail.entity.AddressInfo;
 import com.simple.mail.entity.Mail;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.pop3.POP3Folder;
@@ -26,7 +22,6 @@ import java.util.Map;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.NoSuchProviderException;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.search.ComparisonTerm;
@@ -56,11 +51,13 @@ public class MailReceiver {
      * 上滑加载更多
      * folderType  mail列表文件夹的类型   operatorType 收件箱的类型（全部或者未读）
      */
-    public List<Mail> getPageMailBottom(final Addresser a, final Mail startMail, final int folderType, final int inboxType) {
+    public List<Mail> getPageMailBottom(final AddressInfo a, final Mail startMail, final int folderType, final int inboxType) {
         //先去数据库中取出total个mail
         String emailAccount = a.email_account;
-        if (TextUtils.isEmpty(emailAccount)) return;
-        List<Mail> pageMailFromDb = DBMail.getInstance().getPageMailFromDbIndex(a, startMail, folderType, inboxType);
+        if (TextUtils.isEmpty(emailAccount)) return null;
+        //TODO
+       // List<Mail> pageMailFromDb = DBMail.getInstance().getPageMailFromDbIndex(a, startMail, folderType, inboxType);
+        List<Mail> pageMailFromDb =new ArrayList<>();
 
         //如果数据库中取出的不够total个mail，且此时为收件箱，且为全部的时候，再去服务器请求。
         if (pageMailFromDb.size() < Mail.PAGE_COUNT && folderType == Mail.MAIL_TYPE_INBOX) {
@@ -75,7 +72,7 @@ public class MailReceiver {
     /**
      * 下拉刷新
      */
-    public List<Mail> getPageMailTop(final Addresser addresser, final int folderType) {
+    public List<Mail> getPageMailTop(final AddressInfo addresser, final int folderType) {
         wakeLock.acquire(5000 * 60);
         //取出数据库中最近的一个mail,作为标志位去服务器请求
         List<Mail> pageMailFromServer = getMailFromServer(true, addresser, Mail.PAGE_COUNT);
@@ -91,7 +88,7 @@ public class MailReceiver {
      * @param addresser
      * @return
      */
-    public static Folder getOpenedServerInboxFolder(Addresser addresser) {
+    public static Folder getOpenedServerInboxFolder(AddressInfo addresser) {
         Folder folder = null;
         try {
             Session session = LoginUtils.getSessionPOP3orIMAP(addresser.receiveProtocol);
@@ -119,7 +116,7 @@ public class MailReceiver {
      * @param needMailCount
      * @return
      */
-    public ArrayList<Mail> getMailFromServer(boolean isGetNewMail, Addresser addresser, int needMailCount) {
+    public ArrayList<Mail> getMailFromServer(boolean isGetNewMail, AddressInfo addresser, int needMailCount) {
 
         if (addresser == null || TextUtils.isEmpty(addresser.email_account)) {
             return null;
@@ -173,10 +170,10 @@ public class MailReceiver {
     }
 
 
-    private ArrayList<Mail> getNewMail(Folder folder, Addresser addresser, GetUidInterface getUidInterface, int needMailCount) {
-
-        String firstMailUid = DBAddresser.getInstance().getFirstMailUid(addresser);
-
+    private ArrayList<Mail> getNewMail(Folder folder, AddressInfo addresser, GetUidInterface getUidInterface, int needMailCount) {
+   //TODO
+      //  String firstMailUid = DBAddresser.getInstance().getFirstMailUid(addresser);
+        String firstMailUid ="";
         if ((TextUtils.isEmpty(firstMailUid) || firstMailUid.equals("-1") || firstMailUid.equals("0"))) {//当前邮箱账号第一次取邮件,没有“新邮件”，直接取旧邮件
             return getOldMail(folder, addresser, getUidInterface, needMailCount);
         }
@@ -188,7 +185,7 @@ public class MailReceiver {
             return null;
         }
 
-        return getMail(folder, addresser, getUidInterface, needMailCount, false, firstMailUid, messages);;
+        return getMail(folder, addresser, getUidInterface, needMailCount, false, firstMailUid, messages);
     }
 
     /**
@@ -200,10 +197,12 @@ public class MailReceiver {
      * @param needMailCount
      * @return
      */
-    private ArrayList<Mail> getOldMail(Folder folder, Addresser addresser, GetUidInterface getUidInterface, int needMailCount) {
+    private ArrayList<Mail> getOldMail(Folder folder, AddressInfo addresser, GetUidInterface getUidInterface, int needMailCount) {
 
         boolean isAllowAdd = false;
-        String lastMailUid = DBAddresser.getInstance().getLastMailUid(addresser);
+        //TODO
+       // String lastMailUid = DBAddresser.getInstance().getLastMailUid(addresser);
+        String lastMailUid ="";
         if (TextUtils.isEmpty(lastMailUid) || lastMailUid.equals("-1") || lastMailUid.equals("0")) {//等于空或"-1'、"0"证明第一次登录该账号，直接下载。
             isAllowAdd = true;
         }
@@ -216,7 +215,7 @@ public class MailReceiver {
     }
 
     @NonNull
-    private ArrayList<Mail> getMail(Folder folder, Addresser addresser, GetUidInterface getUidInterface, int needMailCount, boolean isAllowAdd, String lastMailUid, List<Message> messages) {
+    private ArrayList<Mail> getMail(Folder folder, AddressInfo addresser, GetUidInterface getUidInterface, int needMailCount, boolean isAllowAdd, String lastMailUid, List<Message> messages) {
         ArrayList<Mail> list = new ArrayList<>();
         for (Message message : messages) {
             String uid = getUidInterface.getUid(folder, message);
@@ -253,7 +252,7 @@ public class MailReceiver {
      * 从收件箱服务器获取邮件内容
      *
      */
-    public static void getInBoxMailMessage(Mail mail, Addresser addresser) throws MessagingException {
+    public static void getInBoxMailMessage(Mail mail, AddressInfo addresser) throws MessagingException {
         if (addresser != null ) {
             Folder folder = getOpenedServerInboxFolder(addresser);
 
@@ -351,7 +350,7 @@ public class MailReceiver {
      * @Note
      */
     public static class GetMailThread extends Thread {
-        private Addresser a;
+        private AddressInfo a;
         private Mail mail;
         private boolean isNeedStop = false;
         private Object data;

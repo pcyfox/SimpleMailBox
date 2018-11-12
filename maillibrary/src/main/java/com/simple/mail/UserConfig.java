@@ -3,7 +3,7 @@ package com.simple.mail;
 import android.text.TextUtils;
 
 
-import com.simple.mail.entity.Addresser;
+import com.simple.mail.entity.AddressInfo;
 import com.simple.mail.entity.Mail;
 
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ public class UserConfig {
     private UserConfig() {
     }
 
-    public static Addresser addresser;
+    public static AddressInfo addresser;
     public static List<Mail> inbox = new ArrayList<>();
     public static String id = "";
     private static String name;

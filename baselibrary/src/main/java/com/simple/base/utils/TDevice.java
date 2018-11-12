@@ -1,8 +1,10 @@
 package com.simple.base.utils;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -16,9 +18,14 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.os.PowerManager;
+import android.support.annotation.NonNull;
+import android.support.annotation.RequiresPermission;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Display;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -28,6 +35,7 @@ import android.widget.EditText;
 
 
 import com.simple.base.base.BaseApplication;
+import com.simple.base.baselibrary.R;
 import com.simple.base.manager.PreferenceManager;
 
 import java.io.File;
@@ -169,28 +177,6 @@ public class TDevice {
     }
 
 
-    public static int getSupportSoftKeyboardHeight(Activity activity) {
-        Rect r = new Rect();
-        int bottomStatusHeight = getBottomStatusHeight(activity);
-        activity.getWindow().getDecorView().getWindowVisibleDisplayFrame(r);
-        int screenHeight = activity.getWindow().getDecorView().getRootView().getHeight();
-        int softInputHeight = screenHeight - r.bottom;
-        if (Build.VERSION.SDK_INT >= 20) {
-            // When SDK Level >= 20 (Android L), the softInputHeight will contain the height of softButtonsBar (if has)
-            softInputHeight = softInputHeight - bottomStatusHeight;
-            //限制键盘高度不能超过屏幕尺寸的一半
-        }
-        if (softInputHeight < 0) {//发生这种情况说明屏幕底部有虚拟按键
-            softInputHeight += bottomStatusHeight;
-        }
-        if (screenHeight > 100) PreferenceManager.setSoftKeyBoardHeight(softInputHeight);
-        return softInputHeight;
-    }
-
-    public boolean hasBottomStatus(Activity context) {
-        return getBottomStatusHeight(context) > 0;
-    }
-
     /**
      * 检测是否有摄像头
      */
@@ -225,20 +211,6 @@ public class TDevice {
         return flag;
     }
 
-
-    public static boolean gotoGoogleMarket(Activity activity, String pck) {
-        try {
-            Intent intent = new Intent();
-            intent.setPackage("com.android.vending");
-            intent.setAction(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse("market://details?id=" + pck));
-            activity.startActivity(intent);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
 
     public static boolean isPackageExist(Context ct, String pckName) {
         if (ct == null || pckName == null) return false;
@@ -337,23 +309,7 @@ public class TDevice {
         return Environment.MEDIA_MOUNTED.equals(Environment
                 .getExternalStorageState());
     }
-//
-//    public static String getCurCountryLan() {
-//        return BaseApplication.context().getResources().getConfiguration().locale
-//                .getLanguage()
-//                + "-"
-//                + BaseApplication.context().getResources().getConfiguration().locale
-//                .getCountry();
-//    }
 
-//    public static boolean isZhCN() {
-//        String lang = BaseApplication.context().getResources()
-//                .getConfiguration().locale.getCountry();
-//        if (lang.equalsIgnoreCase("CN")) {
-//            return true;
-//        }
-//        return false;
-//    }
 
     public static String percent(double p1, double p2) {
         String str;
@@ -375,7 +331,6 @@ public class TDevice {
 
     public static void gotoMarket(Context context, String pck) {
         if (!isHaveMarket(context)) {
-//    AppContext.showToast("你手机中没有安装应用市场！");
             return;
         }
         Intent intent = new Intent();
@@ -414,7 +369,7 @@ public class TDevice {
         }
     }
 
-    public static void setFullScreen(Activity activity) {
+    public static void setFullScreen(@NonNull Activity activity) {
         WindowManager.LayoutParams params = activity.getWindow()
                 .getAttributes();
         params.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
@@ -432,40 +387,39 @@ public class TDevice {
                 WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
     }
 
-//    public static PackageInfo getPackageInfo(String pckName) {
-//        try {
-//            return BaseApplication.context().getPackageManager()
-//                    .getPackageInfo(pckName, 0);
-//        } catch (NameNotFoundException e) {
-//            e.printStackTrace();
-//        }
-//        return null;
-//    }
-//
-//    public static int getVersionCode() {
-//        int versionCode = 0;
-//        try {
-//            versionCode = BaseApplication
-//                    .context()
-//                    .getPackageManager()
-//                    .getPackageInfo(BaseApplication.context().getPackageName(),
-//                            0).versionCode;
-//        } catch (NameNotFoundException ex) {
-//            versionCode = 0;
-//        }
-//        return versionCode;
-//    }
+    public static PackageInfo getPackageInfo(Context context, String pckName) {
+        try {
+            return context.getApplicationContext().getPackageManager()
+                    .getPackageInfo(pckName, 0);
+        } catch (NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static int getVersionCode(@NonNull Context context) {
+        int versionCode = -1;
+        try {
+            versionCode = context
+                    .getPackageManager()
+                    .getPackageInfo(context.getPackageName(),
+                            0).versionCode;
+        } catch (NameNotFoundException ex) {
+            ex.printStackTrace();
+        }
+        return versionCode;
+    }
 
     /**
      * 获取apk版本号
      */
-    public static int getVersionCode(String packageName) {
+    public static int getVersionCode(@NonNull String packageName) {
         int versionCode = 0;
         try {
             versionCode = BaseApplication.getApplication().getPackageManager()
                     .getPackageInfo(packageName, 0).versionCode;
         } catch (NameNotFoundException ex) {
-            versionCode = 0;
+            ex.printStackTrace();
         }
         return versionCode;
     }
@@ -483,33 +437,32 @@ public class TDevice {
         }
         return version;
     }
-//
-//    /**
-//     * 获取apk版本名
-//     */
-//    public static String getVersionName() {
-//        String name = "";
-//        try {
-//            name = BaseApplication
-//                    .context()
-//                    .getPackageManager()
-//                    .getPackageInfo(BaseApplication.context().getPackageName(),
-//                            0).versionName;
-//        } catch (NameNotFoundException ex) {
-//            name = "";
-//        }
-//        return name;
-//    }
 
-//    /**
-//     * 检车屏幕是否开启
-//     */
-//    @SuppressLint("NewApi")
-//    public static boolean isScreenOn() {
-//        PowerManager pm = (PowerManager) BaseApplication.context()
-//                .getSystemService(Context.POWER_SERVICE);
-//        return pm.isInteractive();
-//    }
+    /**
+     * 获取apk版本名
+     */
+    public static String getVersionName(@NonNull Context context) {
+        String name = "";
+        try {
+            name = context
+                    .getPackageManager()
+                    .getPackageInfo(context.getPackageName(),
+                            0).versionName;
+        } catch (NameNotFoundException ex) {
+            ex.printStackTrace();
+        }
+        return name;
+    }
+
+    /**
+     * 检测屏幕是否开启
+     */
+    @SuppressLint("NewApi")
+    public static boolean isScreenOn(Context context) {
+        PowerManager pm = (PowerManager) context
+                .getSystemService(Context.POWER_SERVICE);
+        return pm.isInteractive();
+    }
 
     /**
      * 安装apk
@@ -570,165 +523,80 @@ public class TDevice {
         context.startActivity(intent);
     }
 
-//    public static String getIMEI() {
-//        TelephonyManager tel = (TelephonyManager) BaseApplication.context()
-//                .getSystemService(Context.TELEPHONY_SERVICE);
-//        return tel.getDeviceId();
-//    }
 
     public static String getPhoneType() {
         return Build.MODEL;
     }
 
-//    public static void openApp(Context context, String packageName) {
-//        Intent mainIntent = BaseApplication.context().getPackageManager()
-//                .getLaunchIntentForPackage(packageName);
-//        if (mainIntent == null) {
-//            mainIntent = new Intent(packageName);
-//        } else {
-////	    TLog.log("Action:" + mainIntent.getAction());
-//        }
-//        context.startActivity(mainIntent);
-//    }
-//
-//    public static boolean openAppActivity(Context context, String packageName,
-//                                          String activityName) {
-//        Intent intent = new Intent(Intent.ACTION_MAIN);
-//        intent.addCategory(Intent.CATEGORY_LAUNCHER);
-//        ComponentName cn = new ComponentName(packageName, activityName);
-//        intent.setComponent(cn);
-//        try {
-//            context.startActivity(intent);
-//            return true;
-//        } catch (Exception e) {
-//            return false;
-//        }
-//    }
-//
-//    public static boolean isWifiOpen() {
-//        boolean isWifiConnect = false;
-//        ConnectivityManager cm = (ConnectivityManager) BaseApplication
-//                .context().getSystemService(Context.CONNECTIVITY_SERVICE);
-//        // check the networkInfos numbers
-//        NetworkInfo[] networkInfos = cm.getAllNetworkInfo();
-//        for (int i = 0; i < networkInfos.length; i++) {
-//            if (networkInfos[i].getState() == NetworkInfo.State.CONNECTED) {
-//                if (networkInfos[i].getType() == ConnectivityManager.TYPE_MOBILE) {
-//                    isWifiConnect = false;
-//                }
-//                if (networkInfos[i].getType() == ConnectivityManager.TYPE_WIFI) {
-//                    isWifiConnect = true;
-//                }
-//            }
-//        }
-//        return isWifiConnect;
-//    }
-//
-//    public static void uninstallApk(Context context, String packageName) {
-//        if (isPackageExist(packageName)) {
-//            Uri packageURI = Uri.parse("package:" + packageName);
-//            Intent uninstallIntent = new Intent(Intent.ACTION_DELETE,
-//                    packageURI);
-//            context.startActivity(uninstallIntent);
-//        }
-//    }
-//
-//    @SuppressWarnings("deprecation")
-//    public static void copyTextToBoard(String string) {
-//        if (TextUtils.isEmpty(string))
-//            return;
-//        ClipboardManager clip = (ClipboardManager) BaseApplication.context()
-//                .getSystemService(Context.CLIPBOARD_SERVICE);
-//        clip.setText(string);
-////	AppContext.showToast(R.string.copy_success);
-//    }
-//
-//    /**
-//     * 发送邮件
-//     *
-//     * @param context
-//     * @param subject 主题
-//     * @param content 内容
-//     * @param emails  邮件地址
-//     */
-//    public static void sendEmail(Context context, String subject,
-//                                 String content, String... emails) {
-//        try {
-//            Intent intent = new Intent(Intent.ACTION_SEND);
-//            // 模拟器
-//            // intent.setType("text/plain");
-//            intent.setType("message/rfc822"); // 真机
-//            intent.putExtra(Intent.EXTRA_EMAIL, emails);
-//            intent.putExtra(Intent.EXTRA_SUBJECT, subject);
-//            intent.putExtra(Intent.EXTRA_TEXT, content);
-//            context.startActivity(intent);
-//        } catch (ActivityNotFoundException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    public static int getStatuBarHeight() {
-//        Class<?> c = null;
-//        Object obj = null;
-//        Field field = null;
-//        int x = 0, sbar = 38;// 默认为38，貌似大部分是这样的
-//        try {
-//            c = Class.forName("com.android.internal.R$dimen");
-//            obj = c.newInstance();
-//            field = c.getField("status_bar_height");
-//            x = Integer.parseInt(field.get(obj).toString());
-//            sbar = BaseApplication.context().getResources()
-//                    .getDimensionPixelSize(x);
-//
-//        } catch (Exception e1) {
-//            e1.printStackTrace();
-//        }
-//        return sbar;
-//    }
-//
-//    public static int getActionBarHeight(Context context) {
-//        int actionBarHeight = 0;
-//        TypedValue tv = new TypedValue();
-//        if (context.getTheme().resolveAttribute(R.attr.actionBarSize,
-//                tv, true))
-//            actionBarHeight = TypedValue.complexToDimensionPixelSize(tv.data,
-//                    context.getResources().getDisplayMetrics());
-//
-//        if (actionBarHeight == 0
-//                && context.getTheme().resolveAttribute(R.attr.actionBarSize,
-//                tv, true)) {
-//            actionBarHeight = TypedValue.complexToDimensionPixelSize(tv.data,
-//                    context.getResources().getDisplayMetrics());
-//        }
-//
-//        return actionBarHeight;
-//    }
-//
-//    public static boolean hasStatusBar(Activity activity) {
-//        WindowManager.LayoutParams attrs = activity.getWindow().getAttributes();
-//        if ((attrs.flags & WindowManager.LayoutParams.FLAG_FULLSCREEN) == WindowManager.LayoutParams.FLAG_FULLSCREEN) {
-//            return false;
-//        } else {
-//            return true;
-//        }
-//    }
-//
-//    /**
-//     * 调用系统安装了的应用分享
-//     *
-//     * @param context
-//     * @param title
-//     * @param url
-//     */
-//    public static void showSystemShareOption(Activity context,
-//                                             final String title, final String url) {
-//        Intent intent = new Intent(Intent.ACTION_SEND);
-//        intent.setType("text/plain");
-//        intent.putExtra(Intent.EXTRA_SUBJECT, "分享：" + title);
-//        intent.putExtra(Intent.EXTRA_TEXT, title + " " + url);
-//        context.startActivity(Intent.createChooser(intent, "选择分享"));
-//    }
-//
+    public static void openApp(Context context, String packageName) {
+        Intent mainIntent = context.getPackageManager()
+                .getLaunchIntentForPackage(packageName);
+        if (mainIntent == null) {
+            mainIntent = new Intent(packageName);
+        }
+        context.startActivity(mainIntent);
+    }
+
+    public static boolean openAppActivity(Context context, String packageName,
+                                          String activityName) {
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+        ComponentName cn = new ComponentName(packageName, activityName);
+        intent.setComponent(cn);
+        try {
+            context.startActivity(intent);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public static boolean isWifiOpen(Context context) {
+        boolean isWifiConnect = false;
+        ConnectivityManager cm = (ConnectivityManager)context .getSystemService(Context.CONNECTIVITY_SERVICE);
+        // check the networkInfos numbers
+        NetworkInfo[] networkInfos = cm.getAllNetworkInfo();
+        for (int i = 0; i < networkInfos.length; i++) {
+            if (networkInfos[i].getState() == NetworkInfo.State.CONNECTED) {
+                if (networkInfos[i].getType() == ConnectivityManager.TYPE_MOBILE) {
+                    isWifiConnect = false;
+                }
+                if (networkInfos[i].getType() == ConnectivityManager.TYPE_WIFI) {
+                    isWifiConnect = true;
+                }
+            }
+        }
+        return isWifiConnect;
+    }
+
+    public static void uninstallApk(Context context, String packageName) {
+        if (isPackageExist(context,packageName)) {
+            Uri packageURI = Uri.parse("package:" + packageName);
+            Intent uninstallIntent = new Intent(Intent.ACTION_DELETE,
+                    packageURI);
+            context.startActivity(uninstallIntent);
+        }
+    }
+
+
+
+
+    /**
+     * 调用系统安装了的应用分享
+     *
+     * @param context
+     * @param title
+     * @param url
+     */
+    public static void showSystemShareOption(Activity context,
+                                             final String title, final String url) {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_SUBJECT, "分享：" + title);
+        intent.putExtra(Intent.EXTRA_TEXT, title + " " + url);
+        context.startActivity(Intent.createChooser(intent, "选择分享"));
+    }
+
 
     /**
      * 获取当前网络类型

@@ -71,15 +71,6 @@ public abstract class BaseApplication extends BaseAbstractApplication implements
         return application;
     }
 
-    /**
-     * 获取顶部activity
-     */
-    public Activity getTopActivity() {
-        if (activities.size() > 0) {
-            return activities.get(0);
-        }
-        return null;
-    }
 
     /**
      * 得到装activity的集合
@@ -147,6 +138,14 @@ public abstract class BaseApplication extends BaseAbstractApplication implements
             }
         }
         activities.clear();
+    }
+
+    public Activity getTopActivity() {
+        int size=activities.size();
+        if (activities.size() > 0) {
+            return activities.get(size-1);
+        }
+        return null;
     }
 
     /**

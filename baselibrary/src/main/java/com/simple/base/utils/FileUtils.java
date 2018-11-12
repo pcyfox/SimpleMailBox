@@ -12,7 +12,6 @@ import android.util.Log;
 
 
 import com.simple.base.config.AppConfig;
-import com.simple.base.manager.TimeUtil;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;

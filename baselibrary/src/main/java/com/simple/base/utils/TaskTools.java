@@ -18,7 +18,6 @@ public class TaskTools {
         taskSubmitter=new TaskSubmitter();
         // 开启线程池
         executorService = Executors.newSingleThreadExecutor();
-
     }
 
     public TaskTracker getTaskTracker() {
@@ -46,18 +45,7 @@ public class TaskTools {
         this.taskSubmitter = taskSubmitter;
     }
 
-    public class TaskSubmitter {
-        @SuppressWarnings("rawtypes")
-        public Future submit(Runnable task) {
-            Future result = null;
-            if (!getExecutorService().isTerminated()
-                    && !getExecutorService().isShutdown() && task != null) {
-                result = getExecutorService().submit(task);
-            }
-            return result;
-        }
 
-    }
 
     /**
      * (支持并发的任务计数) Class for monitoring the running task count.
@@ -79,5 +67,16 @@ public class TaskTools {
             Log.d(TAG, "Decremented task count to " + count);
         }
 
+    }
+
+    public class TaskSubmitter {
+        public Future submit(Runnable task) {
+            Future result = null;
+            if (!getExecutorService().isTerminated()
+                    && !getExecutorService().isShutdown() && task != null) {
+                result = getExecutorService().submit(task);
+            }
+            return result;
+        }
     }
 }

@@ -7,11 +7,14 @@ import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.simple.base.baselibrary.R;
 
 /**
  * 1、获取屏幕宽高 2、dp、px、sp之间转换 Created by yxl on 2016/5/3.
@@ -167,4 +170,30 @@ public class ScreenUtils {
     }
 
 
+    public static int getActionBarHeight(Context context) {
+        int actionBarHeight = 0;
+        TypedValue tv = new TypedValue();
+        if (context.getTheme().resolveAttribute(R.attr.actionBarSize,
+                tv, true))
+            actionBarHeight = TypedValue.complexToDimensionPixelSize(tv.data,
+                    context.getResources().getDisplayMetrics());
+
+        if (actionBarHeight == 0
+                && context.getTheme().resolveAttribute(R.attr.actionBarSize,
+                tv, true)) {
+            actionBarHeight = TypedValue.complexToDimensionPixelSize(tv.data,
+                    context.getResources().getDisplayMetrics());
+        }
+
+        return actionBarHeight;
+    }
+
+    public static boolean hasStatusBar(Activity activity) {
+        WindowManager.LayoutParams attrs = activity.getWindow().getAttributes();
+        if ((attrs.flags & WindowManager.LayoutParams.FLAG_FULLSCREEN) == WindowManager.LayoutParams.FLAG_FULLSCREEN) {
+            return false;
+        } else {
+            return true;
+        }
+    }
 }

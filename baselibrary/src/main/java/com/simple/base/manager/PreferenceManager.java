@@ -3,6 +3,7 @@ package com.simple.base.manager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.simple.base.base.BaseApplication;
@@ -14,15 +15,19 @@ public class PreferenceManager {
     private static SharedPreferences sp;
 
 
-    private static SharedPreferences getPreferencesInstance(Context context) {
-        if (sp == null && context != null) {
-            sp = context.getSharedPreferences("config", Context.MODE_PRIVATE);
+    private static SharedPreferences getPreferencesInstance(@NonNull Context context) {
+        if (sp == null ) {
+            synchronized (PreferenceManager.class){
+                if(sp==null){
+                    sp = context.getSharedPreferences("config", Context.MODE_PRIVATE);
+                }
+            }
+
         }
         return sp;
     }
 
     public static Editor getEditorInstance(Context context) {
-
         if (editor == null) {
             editor = getPreferencesInstance(context).edit();
         }

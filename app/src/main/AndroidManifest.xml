@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.simple.app.simplemailbox">
+    package="com.simple.mail.simplemailbox">
 
     <!-- To auto-complete the email text field in the login form with the user's emails -->
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
@@ -15,9 +15,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name="com.simple.app.activity.WelcomeActivity"
+            android:name="com.simple.mail.activity.WelcomeActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@style/FullscreenTheme">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -36,15 +37,15 @@
 
         </activity>
         <activity
-            android:name="com.simple.app.activity.MailListActivity"
+            android:name="com.simple.mail.activity.MailListActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-            android:name="com.simple.app.activity.LoginActivity"
+            android:name="com.simple.mail.activity.LoginActivity"
             android:label="@string/title_activity_login" />
         <activity
-            android:name="com.simple.app.activity.SettingsActivity"
+            android:name="com.simple.mail.activity.SettingsActivity"
             android:label="@string/title_activity_settings" />
 
     </application>

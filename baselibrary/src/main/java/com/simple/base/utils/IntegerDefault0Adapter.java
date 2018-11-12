@@ -15,6 +15,7 @@ import com.google.gson.JsonSyntaxException;
 import java.lang.reflect.Type;
 
 /**
+ * json数据解析
  * 适配服务器返回""给int
  */
 public class IntegerDefault0Adapter implements JsonSerializer<Integer>, JsonDeserializer<Integer> {

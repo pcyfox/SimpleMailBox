@@ -6,9 +6,6 @@ import java.util.Map;
 
 public class SerMap implements Serializable {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private Map<?, ?> map;
 
